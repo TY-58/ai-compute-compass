@@ -7,12 +7,16 @@ export default {
   theme: {
     container: {
       center: true,
-      padding: "2rem",
+      padding: "1rem",
       screens: {
-        "2xl": "1400px",
+        "2xl": "1600px",
       },
     },
     extend: {
+      fontFamily: {
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+        mono: ['JetBrains Mono', 'monospace'],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -57,6 +61,28 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        // Custom dashboard colors
+        pressure: {
+          low: "hsl(var(--pressure-low))",
+          medium: "hsl(var(--pressure-medium))",
+          high: "hsl(var(--pressure-high))",
+          critical: "hsl(var(--pressure-critical))",
+        },
+        signal: {
+          positive: "hsl(var(--signal-positive))",
+          negative: "hsl(var(--signal-negative))",
+          neutral: "hsl(var(--signal-neutral))",
+        },
+        alert: {
+          breakout: "hsl(var(--alert-breakout))",
+          acceleration: "hsl(var(--alert-acceleration))",
+          hype: "hsl(var(--alert-hype))",
+        },
+        chart: {
+          grid: "hsl(var(--chart-grid))",
+          line: "hsl(var(--chart-line))",
+          area: "hsl(var(--chart-area))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -65,20 +91,12 @@ export default {
       },
       keyframes: {
         "accordion-down": {
-          from: {
-            height: "0",
-          },
-          to: {
-            height: "var(--radix-accordion-content-height)",
-          },
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
         },
         "accordion-up": {
-          from: {
-            height: "var(--radix-accordion-content-height)",
-          },
-          to: {
-            height: "0",
-          },
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
         },
       },
       animation: {
