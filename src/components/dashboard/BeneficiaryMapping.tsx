@@ -1,14 +1,16 @@
 import { useMemo, useState } from 'react';
-import { SUBTHEMES, COMPANIES, Company, SubthemeId, WeeklySubthemeData, calculateCompanyPressureScore } from '@/data/mockData';
+import { SUBTHEMES, Company, SubthemeId, WeeklySubthemeData, calculateCompanyPressureScore, calculateCompany4WeekDelta } from '@/data/mockData';
 import { Badge } from '@/components/ui/badge';
-import { Building2, Globe } from 'lucide-react';
+import { Building2, Globe, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 
 interface BeneficiaryMappingProps {
   data: WeeklySubthemeData[];
+  companies: Company[];
 }
 
-export function BeneficiaryMapping({ data }: BeneficiaryMappingProps) {
+export function BeneficiaryMapping({ data, companies }: BeneficiaryMappingProps) {
   const [selectedSubtheme, setSelectedSubtheme] = useState<SubthemeId | 'all'>('all');
+  const [sortBy, setSortBy] = useState<'score' | 'delta'>('score');
 
   const { latestScores, companiesWithScores } = useMemo(() => {
     const weeks = [...new Set(data.map(d => d.week))].sort();
@@ -20,24 +22,42 @@ export function BeneficiaryMapping({ data }: BeneficiaryMappingProps) {
       scores[subtheme.id] = weekData?.totalScore || 0;
     });
 
-    const withScores = COMPANIES.map(company => ({
+    const withScores = companies.map(company => ({
       ...company,
       pressureScore: calculateCompanyPressureScore(company, scores),
-    })).sort((a, b) => b.pressureScore - a.pressureScore);
+      delta4Week: calculateCompany4WeekDelta(company, data),
+    }));
 
     return { latestScores: scores, companiesWithScores: withScores };
-  }, [data]);
+  }, [data, companies]);
 
   const filteredCompanies = useMemo(() => {
-    if (selectedSubtheme === 'all') return companiesWithScores;
-    return companiesWithScores.filter(c => 
-      c.exposures.some(e => e.subthemeId === selectedSubtheme)
+    let filtered = selectedSubtheme === 'all' 
+      ? companiesWithScores 
+      : companiesWithScores.filter(c => c.exposures.some(e => e.subthemeId === selectedSubtheme));
+    
+    return filtered.sort((a, b) => 
+      sortBy === 'score' 
+        ? b.pressureScore - a.pressureScore 
+        : b.delta4Week - a.delta4Week
     );
-  }, [companiesWithScores, selectedSubtheme]);
+  }, [companiesWithScores, selectedSubtheme, sortBy]);
 
   const getPrimaryExposure = (company: Company) => {
     const sorted = [...company.exposures].sort((a, b) => b.percentage - a.percentage);
     return sorted[0];
+  };
+
+  const getDeltaColor = (delta: number) => {
+    if (delta > 0) return 'text-signal-positive';
+    if (delta < 0) return 'text-signal-negative';
+    return 'text-muted-foreground';
+  };
+
+  const getDeltaIcon = (delta: number) => {
+    if (delta > 2) return <TrendingUp className="w-3 h-3" />;
+    if (delta < -2) return <TrendingDown className="w-3 h-3" />;
+    return <Minus className="w-3 h-3" />;
   };
 
   return (
@@ -52,31 +72,48 @@ export function BeneficiaryMapping({ data }: BeneficiaryMappingProps) {
         </div>
       </div>
 
-      {/* Subtheme Filter */}
-      <div className="flex flex-wrap gap-2 mb-4">
-        <button
-          onClick={() => setSelectedSubtheme('all')}
-          className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-            selectedSubtheme === 'all'
-              ? 'bg-primary text-primary-foreground'
-              : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
-          }`}
-        >
-          All
-        </button>
-        {SUBTHEMES.map(subtheme => (
+      {/* Filters */}
+      <div className="flex flex-wrap items-center gap-2 mb-4">
+        <div className="flex flex-wrap gap-1">
           <button
-            key={subtheme.id}
-            onClick={() => setSelectedSubtheme(subtheme.id)}
+            onClick={() => setSelectedSubtheme('all')}
             className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-              selectedSubtheme === subtheme.id
+              selectedSubtheme === 'all'
                 ? 'bg-primary text-primary-foreground'
                 : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
             }`}
           >
-            {subtheme.shortName}
+            All
           </button>
-        ))}
+          {SUBTHEMES.map(subtheme => (
+            <button
+              key={subtheme.id}
+              onClick={() => setSelectedSubtheme(subtheme.id)}
+              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                selectedSubtheme === subtheme.id
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+              }`}
+            >
+              {subtheme.shortName}
+            </button>
+          ))}
+        </div>
+        <div className="ml-auto flex items-center gap-1 text-xs">
+          <span className="text-muted-foreground">Sort:</span>
+          <button
+            onClick={() => setSortBy('score')}
+            className={`px-2 py-1 rounded ${sortBy === 'score' ? 'bg-secondary text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+          >
+            Score
+          </button>
+          <button
+            onClick={() => setSortBy('delta')}
+            className={`px-2 py-1 rounded ${sortBy === 'delta' ? 'bg-secondary text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+          >
+            4W Δ
+          </button>
+        </div>
       </div>
 
       {/* Companies Grid */}
@@ -124,8 +161,19 @@ export function BeneficiaryMapping({ data }: BeneficiaryMappingProps) {
                 </div>
               </div>
 
+              {/* 4-Week Delta */}
+              <div className="text-center min-w-[50px]">
+                <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                  4W Δ
+                </div>
+                <div className={`flex items-center justify-center gap-0.5 font-mono text-sm font-semibold ${getDeltaColor(company.delta4Week)}`}>
+                  {getDeltaIcon(company.delta4Week)}
+                  {company.delta4Week > 0 ? '+' : ''}{Math.round(company.delta4Week)}
+                </div>
+              </div>
+
               {/* Pressure Score */}
-              <div className="text-right">
+              <div className="text-right min-w-[50px]">
                 <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
                   Score
                 </div>

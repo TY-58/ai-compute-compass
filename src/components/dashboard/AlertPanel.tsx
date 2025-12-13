@@ -1,6 +1,8 @@
-import { Alert as AlertData, SUBTHEMES } from '@/data/mockData';
-import { AlertTriangle, TrendingUp, Zap, X } from 'lucide-react';
+import { Alert as AlertData, SUBTHEMES, SIGNALS, SignalType } from '@/data/mockData';
+import { AlertTriangle, TrendingUp, Zap, X, ChevronDown, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
+import { Badge } from '@/components/ui/badge';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 interface AlertPanelProps {
   alerts: AlertData[];
@@ -8,6 +10,7 @@ interface AlertPanelProps {
 
 export function AlertPanel({ alerts }: AlertPanelProps) {
   const [dismissedAlerts, setDismissedAlerts] = useState<Set<string>>(new Set());
+  const [expandedAlerts, setExpandedAlerts] = useState<Set<string>>(new Set());
 
   const visibleAlerts = alerts.filter(a => !dismissedAlerts.has(a.id));
 
@@ -43,8 +46,25 @@ export function AlertPanel({ alerts }: AlertPanelProps) {
     }
   };
 
+  const getSignalName = (signalType?: SignalType) => {
+    if (!signalType) return '';
+    return SIGNALS.find(s => s.id === signalType)?.name || signalType;
+  };
+
   const dismissAlert = (id: string) => {
     setDismissedAlerts(prev => new Set([...prev, id]));
+  };
+
+  const toggleExpanded = (id: string) => {
+    setExpandedAlerts(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
   };
 
   if (visibleAlerts.length === 0) {
@@ -76,50 +96,82 @@ export function AlertPanel({ alerts }: AlertPanelProps) {
           const config = getAlertConfig(alert.type);
           const Icon = config.icon;
           const subtheme = SUBTHEMES.find(s => s.id === alert.subthemeId);
+          const isExpanded = expandedAlerts.has(alert.id);
+          const hasRationale = !!alert.triggeringRationale;
 
           return (
-            <div
+            <Collapsible
               key={alert.id}
-              className={`
-                relative p-3 rounded-lg border
-                ${config.bgColor} ${config.borderColor}
-                animate-fade-in
-              `}
-              style={{ animationDelay: `${index * 100}ms` }}
+              open={isExpanded}
+              onOpenChange={() => hasRationale && toggleExpanded(alert.id)}
             >
-              <button
-                onClick={() => dismissAlert(alert.id)}
-                className="absolute top-2 right-2 p-1 rounded hover:bg-secondary/50 transition-colors"
+              <div
+                className={`
+                  relative p-3 rounded-lg border
+                  ${config.bgColor} ${config.borderColor}
+                  animate-fade-in
+                `}
+                style={{ animationDelay: `${index * 100}ms` }}
               >
-                <X className="w-3.5 h-3.5 text-muted-foreground" />
-              </button>
+                <button
+                  onClick={() => dismissAlert(alert.id)}
+                  className="absolute top-2 right-2 p-1 rounded hover:bg-secondary/50 transition-colors"
+                >
+                  <X className="w-3.5 h-3.5 text-muted-foreground" />
+                </button>
 
-              <div className="flex items-start gap-3 pr-6">
-                <div className={`p-2 rounded-lg ${config.bgColor}`}>
-                  <Icon className={`w-4 h-4 ${config.iconColor}`} />
+                <div className="flex items-start gap-3 pr-6">
+                  <div className={`p-2 rounded-lg ${config.bgColor}`}>
+                    <Icon className={`w-4 h-4 ${config.iconColor}`} />
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1 flex-wrap">
+                      <span className={`text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${config.labelBg}`}>
+                        {config.label}
+                      </span>
+                      {alert.driverSignal && (
+                        <Badge variant="outline" className="text-[10px]">
+                          Driver: {getSignalName(alert.driverSignal)}
+                        </Badge>
+                      )}
+                    </div>
+                    <p className="text-sm text-foreground font-medium">
+                      {alert.message}
+                    </p>
+                    <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+                      <span>{subtheme?.name}</span>
+                      {alert.score && (
+                        <span className="font-mono">Score: {alert.score}</span>
+                      )}
+                      {alert.delta && (
+                        <span className="font-mono text-signal-positive">+{alert.delta}</span>
+                      )}
+                    </div>
+
+                    {hasRationale && (
+                      <CollapsibleTrigger asChild>
+                        <button className="flex items-center gap-1 mt-2 text-xs text-primary hover:underline">
+                          {isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                          {isExpanded ? 'Hide rationale' : 'View rationale'}
+                        </button>
+                      </CollapsibleTrigger>
+                    )}
+                  </div>
                 </div>
 
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className={`text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${config.labelBg}`}>
-                      {config.label}
-                    </span>
-                  </div>
-                  <p className="text-sm text-foreground font-medium">
-                    {alert.message}
-                  </p>
-                  <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
-                    <span>{subtheme?.name}</span>
-                    {alert.score && (
-                      <span className="font-mono">Score: {alert.score}</span>
-                    )}
-                    {alert.delta && (
-                      <span className="font-mono text-signal-positive">+{alert.delta}</span>
-                    )}
-                  </div>
-                </div>
+                <CollapsibleContent>
+                  {alert.triggeringRationale && (
+                    <div className="mt-3 pt-3 border-t border-border/50">
+                      <p className="text-xs text-muted-foreground leading-relaxed">
+                        <span className="font-medium text-foreground">Analyst Note: </span>
+                        {alert.triggeringRationale}
+                      </p>
+                    </div>
+                  )}
+                </CollapsibleContent>
               </div>
-            </div>
+            </Collapsible>
           );
         })}
       </div>
