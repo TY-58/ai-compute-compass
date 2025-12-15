@@ -76,9 +76,9 @@ export function PressureDelta({ data }: PressureDeltaProps) {
   };
 
   return (
-    <div className="bg-card rounded-lg border border-border p-4">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-foreground">Pressure Delta</h2>
+    <div className="glass-card rounded-xl border border-border/50 p-5 card-interactive">
+      <div className="flex items-center justify-between mb-5">
+        <h2 className="text-lg font-semibold text-foreground tracking-tight">Pressure Delta</h2>
         <span className="text-xs text-muted-foreground">Sorted by 30-day change</span>
       </div>
 
@@ -86,7 +86,7 @@ export function PressureDelta({ data }: PressureDeltaProps) {
         {deltaData.map((item, index) => (
           <div 
             key={item.subthemeId}
-            className="p-3 rounded-lg bg-secondary/30 animate-fade-in"
+            className="p-4 rounded-xl bg-secondary/40 border border-border/30 animate-slide-up hover-lift shine"
             style={{ animationDelay: `${index * 50}ms` }}
           >
             <div className="flex items-center gap-4">
@@ -95,7 +95,7 @@ export function PressureDelta({ data }: PressureDeltaProps) {
                   <span className="text-sm font-medium text-foreground truncate">
                     {item.name}
                   </span>
-                  <span className="font-mono text-lg font-bold text-foreground">
+                  <span className="font-mono text-xl font-bold text-foreground number-glow">
                     {item.currentScore}
                   </span>
                 </div>
