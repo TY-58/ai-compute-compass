@@ -69,13 +69,13 @@ export function AlertPanel({ alerts }: AlertPanelProps) {
 
   if (visibleAlerts.length === 0) {
     return (
-      <div className="bg-card rounded-lg border border-border p-4">
-        <h2 className="text-lg font-semibold text-foreground mb-4">Active Alerts</h2>
+      <div className="glass-card rounded-xl border border-border/50 p-5">
+        <h2 className="text-lg font-semibold text-foreground tracking-tight mb-4">Active Alerts</h2>
         <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
-          <div className="w-12 h-12 rounded-full bg-secondary/50 flex items-center justify-center mb-3">
-            <TrendingUp className="w-6 h-6" />
+          <div className="w-14 h-14 rounded-2xl bg-secondary/50 flex items-center justify-center mb-3 animate-float">
+            <TrendingUp className="w-6 h-6 text-primary" />
           </div>
-          <p className="text-sm">No active alerts</p>
+          <p className="text-sm font-medium">No active alerts</p>
           <p className="text-xs mt-1">Signals are within normal ranges</p>
         </div>
       </div>
@@ -83,10 +83,10 @@ export function AlertPanel({ alerts }: AlertPanelProps) {
   }
 
   return (
-    <div className="bg-card rounded-lg border border-border p-4">
+    <div className="glass-card rounded-xl border border-border/50 p-5">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-foreground">Active Alerts</h2>
-        <span className="text-xs font-medium px-2 py-1 rounded-full bg-destructive/20 text-destructive">
+        <h2 className="text-lg font-semibold text-foreground tracking-tight">Active Alerts</h2>
+        <span className="text-xs font-medium px-3 py-1.5 rounded-full bg-destructive/20 text-destructive badge-pulse">
           {visibleAlerts.length} active
         </span>
       </div>
@@ -107,9 +107,9 @@ export function AlertPanel({ alerts }: AlertPanelProps) {
             >
               <div
                 className={`
-                  relative p-3 rounded-lg border
+                  relative p-4 rounded-xl border
                   ${config.bgColor} ${config.borderColor}
-                  animate-fade-in
+                  animate-slide-up hover-lift
                 `}
                 style={{ animationDelay: `${index * 100}ms` }}
               >

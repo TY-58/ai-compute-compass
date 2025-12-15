@@ -40,15 +40,15 @@ export function SignalBreakdown({ data }: SignalBreakdownProps) {
   ];
 
   return (
-    <div className="bg-card rounded-lg border border-border p-4">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-foreground">Signal Breakdown</h2>
+    <div className="glass-card rounded-xl border border-border/50 p-5 card-interactive">
+      <div className="flex items-center justify-between mb-5">
+        <h2 className="text-lg font-semibold text-foreground tracking-tight">Signal Breakdown</h2>
         {breakdown && (
           <div className="text-right">
             <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
               Total Score
             </div>
-            <div className="font-mono text-2xl font-bold text-foreground">
+            <div className="font-mono text-2xl font-bold text-primary number-glow">
               {breakdown.total}
             </div>
           </div>
@@ -61,10 +61,10 @@ export function SignalBreakdown({ data }: SignalBreakdownProps) {
           <button
             key={subtheme.id}
             onClick={() => setSelectedSubtheme(subtheme.id)}
-            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+            className={`px-4 py-2 rounded-xl text-xs font-medium transition-all duration-300 ${
               selectedSubtheme === subtheme.id
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+                ? 'bg-primary text-primary-foreground glow-subtle'
+                : 'bg-secondary/60 text-secondary-foreground hover:bg-secondary hover-lift'
             }`}
           >
             {subtheme.shortName}
@@ -77,23 +77,23 @@ export function SignalBreakdown({ data }: SignalBreakdownProps) {
         {signalDisplayData.map((signal, index) => (
           <div 
             key={signal.id} 
-            className="animate-fade-in"
-            style={{ animationDelay: `${index * 50}ms` }}
+            className="animate-slide-up group"
+            style={{ animationDelay: `${index * 80}ms` }}
           >
-            <div className="flex items-center justify-between mb-1.5">
+            <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
-                <span className="text-sm text-foreground">{signal.name}</span>
-                <span className={`text-xs font-mono ${signal.id === 'narrative-saturation' ? 'text-destructive' : 'text-muted-foreground'}`}>
+                <span className="text-sm text-foreground font-medium">{signal.name}</span>
+                <span className={`text-xs font-mono px-2 py-0.5 rounded-full ${signal.id === 'narrative-saturation' ? 'text-destructive bg-destructive/10' : 'text-muted-foreground bg-muted/50'}`}>
                   {signal.weight}
                 </span>
               </div>
-              <span className="font-mono text-sm font-semibold text-foreground">
+              <span className="font-mono text-sm font-bold text-foreground">
                 {signal.value}/{signal.max}
               </span>
             </div>
-            <div className="relative h-2 bg-secondary rounded-full overflow-hidden">
+            <div className="relative h-2.5 bg-secondary/60 rounded-full overflow-hidden">
               <div
-                className={`absolute inset-y-0 left-0 rounded-full transition-all duration-500 ${getSignalColor(signal.id)}`}
+                className={`absolute inset-y-0 left-0 rounded-full transition-all duration-700 ease-out progress-animate ${getSignalColor(signal.id)} group-hover:brightness-125`}
                 style={{ width: `${(signal.value! / signal.max!) * 100}%` }}
               />
             </div>
@@ -102,24 +102,24 @@ export function SignalBreakdown({ data }: SignalBreakdownProps) {
       </div>
 
       {/* Scoring Rules Reference */}
-      <div className="mt-6 pt-4 border-t border-border">
+      <div className="mt-6 pt-4 border-t border-border/50">
         <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
           Scoring Rules
         </h3>
-        <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
-          <div>
+        <div className="grid grid-cols-2 gap-x-4 gap-y-2.5 text-xs">
+          <div className="p-2 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors">
             <span className="text-muted-foreground">CapEx:</span>
             <span className="text-foreground ml-1">+10 single, +20 multi, +30 weak macro</span>
           </div>
-          <div>
+          <div className="p-2 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors">
             <span className="text-muted-foreground">Constraint:</span>
             <span className="text-foreground ml-1">+10 mild, +20 sustained, +25 structural</span>
           </div>
-          <div>
+          <div className="p-2 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors">
             <span className="text-muted-foreground">Hiring:</span>
             <span className="text-foreground ml-1">+5 net, +10 specialized, +15 sustained</span>
           </div>
-          <div>
+          <div className="p-2 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors">
             <span className="text-muted-foreground">Govt:</span>
             <span className="text-foreground ml-1">+5 policy, +10 funding, +15 multi-year</span>
           </div>

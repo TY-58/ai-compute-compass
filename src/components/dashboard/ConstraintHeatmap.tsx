@@ -79,9 +79,9 @@ export function ConstraintHeatmap({ data }: ConstraintHeatmapProps) {
 
   return (
     <>
-      <div className="bg-card rounded-lg border border-border p-4">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-foreground">Constraint Pressure Heatmap</h2>
+      <div className="glass-card rounded-xl border border-border/50 p-5 card-interactive">
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="text-lg font-semibold text-foreground tracking-tight">Constraint Pressure Heatmap</h2>
           <div className="flex items-center gap-3 text-xs">
             <div className="flex items-center gap-1.5">
               <div className="w-3 h-3 rounded bg-pressure-low/50" />
@@ -132,13 +132,15 @@ export function ConstraintHeatmap({ data }: ConstraintHeatmapProps) {
                               onClick={() => handleCellClick(subtheme, week)}
                               className={`
                                 flex items-center justify-center 
-                                h-10 rounded border
-                                font-mono text-sm font-semibold
-                                transition-all duration-200 hover:scale-105 cursor-pointer
+                                h-11 rounded-lg border
+                                font-mono text-sm font-bold
+                                transition-all duration-300 
+                                hover:scale-110 hover:z-10 hover:shadow-lg
+                                cursor-pointer shine
                                 ${getPressureColor(score)} ${getPressureBorder(score)}
                               `}
                             >
-                              {score}
+                              <span className="number-glow">{score}</span>
                             </div>
                           </TooltipTrigger>
                           <TooltipContent side="top" className="bg-popover border-border">
